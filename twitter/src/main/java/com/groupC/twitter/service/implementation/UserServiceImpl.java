@@ -20,6 +20,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -113,7 +115,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
     public List<UserDto> getFollowers(long userId) {
         this.userRepository.findById(userId).orElseThrow(()->new UserNotFoundException(HttpStatus.NOT_FOUND,"User doesn't exist"));
         User user = userRepository.getReferenceById(userId);
@@ -125,7 +126,6 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    @Transactional
     public List<UserDto> getFollowings(long userId) {
         this.userRepository.findById(userId).orElseThrow(()->new UserNotFoundException(HttpStatus.NOT_FOUND,"User doesn't exist"));
         User user = userRepository.getReferenceById(userId);
@@ -136,6 +136,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public boolean addFollowing(long userId, long followingId) {
         this.userRepository.findById(userId).orElseThrow(()->new UserNotFoundException(HttpStatus.NOT_FOUND,"User doesn't exist"));
         this.userRepository.findById(followingId).orElseThrow(()->new UserNotFoundException(HttpStatus.NOT_FOUND,"User doesn't exist"));
@@ -148,6 +149,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public boolean deleteFollowing(long userId, long followingId) {
         this.userRepository.findById(userId).orElseThrow(()->new UserNotFoundException(HttpStatus.NOT_FOUND,"User doesn't exist"));
         this.userRepository.findById(followingId).orElseThrow(()->new UserNotFoundException(HttpStatus.NOT_FOUND,"User doesn't exist"));
@@ -196,44 +198,20 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
+
     @Override
-    public List<UserDto> getRequestBluetick() {
-        List<User> requestList =  userRepository.findByIsVerified(2);
-        List<UserDto> request = requestList.stream().map((user1)->this.modelMapper.map(user1,UserDto.class))
+    public List<UserDto> searchUser(String keyword) {
+        List<User> users = userRepository.searchByName(keyword);
+        List<UserDto> userDtos = users.stream().map(user -> modelMapper.map(user,UserDto.class))
                 .collect(Collectors.toList());
-       return request;
+        return userDtos;
     }
 
     @Override
-    public boolean setBluetick(long userId,boolean resp) {
-        User user=this.userRepository.findById(userId).orElseThrow(()->new UserNotFoundException(HttpStatus.NOT_FOUND,"User doesn't exist"));
-//        User user = userRepository.getReferenceById(userId);
-        if(resp==true) {
-            user.setIsVerified(3);
+    public void removeBookmark(long userId, long tweetId) {
+        if(getBookmark(userId,tweetId)){
+            bookmarkRepository.deleteByUserIdAndTweetId(userId,tweetId);
         }
-        else{
-            user.setIsVerified(1);
-        }
-        userRepository.save(user);
-        return true;
-    }
-
-    @Override
-    public List<MessagesDto> addMessage(MessagesDto messagesDto) {
-        Messages messages = modelMapper.map( messagesDto,Messages.class);
-        messageRepository.save(messages);
-        List<Messages> messageList = messageRepository.findBySenderIdAndRecieverId(messagesDto.getSenderId(),messagesDto.getRecieverId());
-        List<MessagesDto> request = messageList.stream().map((message)->this.modelMapper.map(message,MessagesDto.class))
-                .collect(Collectors.toList());
-        return request;
-    }
-
-    @Override
-    public List<MessagesDto> getMessage(long senderId, long recieverId) {
-        List<Messages> messageList = messageRepository.findBySenderIdAndRecieverId(senderId,recieverId);
-        List<MessagesDto> request = messageList.stream().map((message)->this.modelMapper.map(message,MessagesDto.class))
-                .collect(Collectors.toList());
-        return request;
     }
 
 

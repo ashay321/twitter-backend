@@ -40,12 +40,9 @@ public interface UserService {
 
     public void requestBluetick(long userId);
 
-    public List<UserDto> getRequestBluetick();
 
-    public boolean setBluetick(long userId,boolean resp);
 
-    public List<MessagesDto> addMessage(MessagesDto messagesDto);
+    public List<UserDto> searchUser(String keyword);
 
-    public List<MessagesDto> getMessage(long senderId,long recieverId);
-
+    public void removeBookmark(long userId, long tweetId);
 }

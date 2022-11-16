@@ -105,6 +105,13 @@ public class UserController {
     public ResponseEntity getBookmark(@PathVariable("userId") long userId){
         return new ResponseEntity(userService.getBookmarks(userId),HttpStatus.OK);
     }
+
+    @DeleteMapping("/{userId}/bookmark/{tweetId}")
+    public ResponseEntity removeBookmark(@PathVariable("userId") long userId,@PathVariable("tweetId") long tweetId){
+        userService.removeBookmark(userId,tweetId);
+        return new ResponseEntity("successfully removed",HttpStatus.OK);
+    }
+
     //this api is use for request blue tick for user.
     @PutMapping("/bluetick/{userId}")
     public ResponseEntity requestBluetick(@PathVariable("userId") long userId){
@@ -112,34 +119,12 @@ public class UserController {
         return new ResponseEntity("Blue tick requested",HttpStatus.OK);
     }
 
-    // admin can see all blue tick request using this api
-    @GetMapping("/admin/bluetick")
-    public ResponseEntity bluetickRequest(){
-        return new ResponseEntity(userService.getRequestBluetick(),HttpStatus.OK);
-    }
 
-    // admin can update the status of user bluetick request.
-    @PutMapping("/admin/bluetick/status/{userId}/{response}")
-    public ResponseEntity bluetick(@PathVariable("userId") long userId,@PathVariable("response") boolean resp){
-        return new ResponseEntity(userService.setBluetick(userId,resp),HttpStatus.OK);
-    }
 
     //this api is use for getting all the notification of user.
     @GetMapping("/notification/{userId}")
     public ResponseEntity notification(@PathVariable("userId") long userId){
         return new ResponseEntity(notificationService.getNotification(userId),HttpStatus.OK);
-    }
-
-    //this api is use for post the message of user to other user of his list.
-    @PostMapping("/message")
-    public ResponseEntity userMessage(@RequestBody MessagesDto messagesDto){
-        return new ResponseEntity(userService.addMessage(messagesDto),HttpStatus.OK);
-    }
-
-    //this api is use for getting all messages of users to other users.
-    @GetMapping("/message/{senderId}/{recieverId}")
-    public ResponseEntity getUserMessage(@PathVariable("senderId") long senderId , @PathVariable("recieverId") long recieverId){
-        return new ResponseEntity(userService.getMessage(senderId,recieverId),HttpStatus.OK);
     }
 
 }
